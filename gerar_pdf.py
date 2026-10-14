@@ -46,6 +46,46 @@ subprocess.run(
     cwd=notebook.parent,
 )
 
+# O HTML do nbconvert mantém os blocos de código em uma única linha visual.
+# Na impressão em PDF isso pode fazer o fim das linhas sair da página. Este
+# estilo limita os elementos à largura imprimível e permite a quebra visual.
+conteudo_html = html.read_text(encoding="utf-8")
+estilo_impressao = """
+<style>
+@page {
+    size: A4;
+    margin: 12mm;
+}
+@media print {
+    pre,
+    code,
+    .highlight pre,
+    .jp-InputArea-editor pre {
+        white-space: pre-wrap !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    .highlight,
+    .input_area,
+    .jp-InputArea,
+    .jp-InputArea-editor,
+    .jp-CodeCell,
+    .jp-Cell {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+
+    table {
+        max-width: 100% !important;
+    }
+}
+</style>
+"""
+conteudo_html = conteudo_html.replace("</head>", f"{estilo_impressao}</head>", 1)
+html.write_text(conteudo_html, encoding="utf-8")
+
 pastas = [
     Path(os.environ.get("PROGRAMFILES", "")) / "Microsoft/Edge/Application/msedge.exe",
     Path(os.environ.get("PROGRAMFILES(X86)", "")) / "Microsoft/Edge/Application/msedge.exe",
